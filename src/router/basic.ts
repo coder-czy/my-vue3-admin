@@ -2,7 +2,7 @@ import { AppRouteRecordRaw } from './type'
 
 export const route: AppRouteRecordRaw[] = [
   {
-    path: '/dashboard',
+    path: '/',
     name: '首页',
     meta: {},
     component: () => import('/@/views/dashboard/index.vue'),
@@ -10,8 +10,18 @@ export const route: AppRouteRecordRaw[] = [
   {
     path: '/login',
     name: '登录',
-    meta: {},
+    meta: {
+      white: true,
+    },
     component: () => import('/@/views/login/index.vue'),
+  },
+  {
+    path: '/showPage/:id',
+    name: '二维码详情',
+    meta: {
+      white: true,
+    },
+    component: () => import('/@/views/showPage/index.vue'),
   },
   {
     path: '/404',

@@ -20,6 +20,21 @@ export default defineConfig(({ mode }) => {
   return {
     base: '/',
     root: process.cwd(),
+    server: {
+      port: 8888,
+      host: '0.0.0.0',
+      proxy: {
+        '/api': {
+          // target: 'http://47.99.204.103:8888',
+          target: 'http://localhost:3000',
+          ws: true,
+          changeOrigin: true,
+        },
+      },
+    },
+    build: {
+      // sourcemap: true,
+    },
     resolve: {
       alias: [
         // /@/xxxx => src/xxxx

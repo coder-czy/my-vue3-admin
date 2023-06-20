@@ -17,18 +17,21 @@
       >
         <el-form-item
           label="账号"
-          prop="account"
+          prop="username"
+          label-width="50px"
         >
-          <el-input v-model="ruleForm.account" type="text" autocomplete="off" />
+          <el-input v-model="ruleForm.username" type="text" autocomplete="off" />
         </el-form-item>
         <el-form-item
           label="密码"
           prop="password"
+          label-width="50px"
         >
           <el-input
             v-model="ruleForm.password"
             :type="showPass ? 'text' : 'password'"
             autocomplete="off"
+            @keyup.enter="submitForm(ruleFormRef)"
           >
             <template #suffix>
               <div @click="toggleShow">
@@ -43,7 +46,7 @@
         <el-form-item> </el-form-item>
       </el-form>
       <div
-        class="bg-gradient-to-r from-blue-400 to-purple-500 w-2/3 m-auto text-white text-center rounded-md text-md py-2"
+        class="bg-gradient-to-r from-blue-400 to-purple-500 m-auto text-white text-center rounded-md text-md py-2 w-full"
         @click="submitForm(ruleFormRef)"
       >
         登录
@@ -55,9 +58,15 @@
 <script setup lang="ts">
 import { ref, reactive, onMounted, onBeforeUnmount } from 'vue'
 import type { FormInstance, FormRules } from 'element-plus'
+import  { ElMessage } from 'element-plus'
 import { Hide, View } from '@element-plus/icons-vue'
 import { useRouter } from 'vue-router'
-import { userStore } from '/@/store'
+
+import { userStore } from '/@/store/user'
+import  pinia  from "/@/store";
+import { login } from "/@/api/user";
+import { ResultData,LoginResult } from "/@/type";
+import { setToken } from "/@/utils/storage";
 
 onMounted(() => {
   resizeHandler()
@@ -83,13 +92,10 @@ function resizeHandler() {
 
 const title = import.meta.env.VITE_GLOB_APP_SHORT_NAME
 // 路由跳转
-const { push } = useRouter()
-const toHome = () => {
-  push('/dashboard')
-}
+
 
 // 切换密码图标
-let showPass = ref(true)
+let showPass = ref(false)
 const toggleShow = () => {
   showPass.value = !showPass.value
 }
@@ -116,23 +122,30 @@ const validatePassword = (rule: any, value: any, callback: any) => {
 }
 
 const ruleForm = reactive({
-  account: '',
+  username: '',
   password: '',
 })
 
 const rules = reactive<FormRules>({
-  account: [{ validator: validateAccount, trigger: 'blur' }],
+  username: [{ validator: validateAccount, trigger: 'blur' }],
   password: [{ validator: validatePassword, trigger: 'blur' }],
 })
 
-const user_store = userStore()
+const user_store = userStore(pinia)
+const { replace } = useRouter()
 const submitForm = (formEl: FormInstance | undefined) => {
   if (!formEl) return
-  formEl.validate((valid) => {
+  formEl.validate( async(valid) => {
     if (valid) {
-      console.log('submit!')
-      user_store.setUserInfo({ userName: ruleForm.account })
-      toHome()
+      const res:ResultData<LoginResult> = await login(ruleForm)
+        console.log(res);
+      if(res?.code===200){
+        let {accessToken,refreshToken} = res.data as LoginResult
+        user_store.setUserInfo({accessToken,refreshToken})
+        setToken(accessToken,refreshToken)
+        ElMessage({message:'登录成功！',type:'success'})
+        replace('/')
+      }
     } else {
       console.log('error submit!')
       return false

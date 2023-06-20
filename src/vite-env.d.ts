@@ -4,6 +4,8 @@ interface ImportMetaEnv {
   readonly VITE_GLOB_APP_SHORT_NAME: string
   readonly VITE_GLOB_APP_TITLE: string
   readonly VITE_PORT: string
+  readonly VITE_BASIC_URL: string
+  readonly VITE_EXPORT_URL: string
   // 更多环境变量...
 }
 
