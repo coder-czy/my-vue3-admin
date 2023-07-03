@@ -8,7 +8,7 @@ run-name: Deploy by @${{ github.actor }}
 on:
   # 每当 push 到 main分支时触发部署
   push:
-    branches: 
+    branches:
       - main
 
 # 当前流程要执行的任务，可以是多个。[my_first_job]就是一个任务
@@ -35,25 +35,36 @@ jobs:
         with:
           # 选择要使用的 node 版本
           node-version: '16'
-      
-      # 缓存pnpm
-      - name: Cache dependencies
-        uses: pnpm/actions@v2
-        with: 
-          args: install
-          cache: pnpm
-        env:
-          CACHE_KEY: ${{ runner.os }}-node-${{ hashFiles('**/pnpm-lock.yaml') }}
-        # 缓存的目录
-        # 注意：此处要指定缓存 node_modules，而非整个项目目录
-        # 这样可以加快恢复依赖的速度
-        # 如果您需要缓存其他目录，请将它们加入到此列表中
-        # 注意：如果您有多个工作目录，请分别缓存它们
-        # 如果您的项目比较大，您还可以使用更多的缓存键，以便更快地缓存和恢复依赖
-        with:
-          paths:
-            - node_modules
 
+      # setup pnpm
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v2
+        id: pnpm-install
+        with:
+          version: 7
+          run_install: false
+
+      # 下边是新增配置
+      # pnpm cache
+      - name: Get pnpm store directory
+        id: pnpm-cache
+        shell: bash
+        run: |
+          echo "STORE_PATH=$(pnpm store path)" >> $GITHUB_OUTPUT
+
+      - name: Setup pnpm cache
+        uses: actions/cache@v3
+        with:
+          path: ${{ steps.pnpm-cache.outputs.STORE_PATH }}
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-
+
+      # cache fail and install dependencies
+      - name: Install dependencies
+        if: steps.pnpm-cache.outputs.cache-hit != 'true'
+        run: |
+          pnpm install
 
       # 如果你的依赖是使用npm的，用这种
       # 缓存 npm node_modules
