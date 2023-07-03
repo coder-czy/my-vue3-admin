@@ -102,7 +102,7 @@ jobs:
 
       # 运行构建脚本
       - name: Run Build Script
-        run: npm run build
+        run: npm run build:prod
 
       # 部署到服务器
       - name: Deploy
