@@ -9,7 +9,7 @@
           class="h-full w-32 text-center bg-gradient-to-r from-blue-400 to-purple-500 text-white flex items-center justify-center text-lg cursor-pointer"
           @click="logout"
         >
-          退出登录
+          退出登录*
         </div>
       </el-header>
       <el-main class="mt-16 mb-0 pb-0" v-loading="loading">

@@ -94,7 +94,7 @@ jobs:
         run: pnpm run build
 
       # 部署到服务器
-        name: Deploy
+      - name: Deploy
         uses: cross-the-world/scp-pipeline@master
         with:
           host: ${{ secrets.MY_HOST }} # 服务器IP（需要在GitHub上自行配置对应的secret）
